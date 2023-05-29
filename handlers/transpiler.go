@@ -1,14 +1,35 @@
 package transpiler
 
 import (
-	"github.com/antlr4-go/antlr/v4"
 	"github.com/gofiber/fiber/v2"
-	"github.com/saqura-io/hanami/listeners"
-	"github.com/saqura-io/hanami/petalscript"
+	clickhouse "github.com/saqura-io/hanami/db"
+	traverser "github.com/saqura-io/hanami/pkg/transpilation"
 )
 
 type transpilationRequest struct {
 	PetalScript string `json:"petalscript"`
+}
+
+func RunAgainstClickHouse(c *fiber.Ctx) error {
+	var req transpilationRequest
+
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid JSON",
+		})
+	}
+
+	transpiled := traverser.Walk(req.PetalScript)
+	ch := clickhouse.Connect()
+
+	rows, err := ch.GetRowsByQuery(transpiled)
+	if err != nil {
+		return c.Status(fiber.ErrInternalServerError.Code).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.JSON(rows)
 }
 
 func TranspileToSQL(c *fiber.Ctx) error {
@@ -20,15 +41,9 @@ func TranspileToSQL(c *fiber.Ctx) error {
 		})
 	}
 
-	is := antlr.NewInputStream(req.PetalScript)
-	lexer := petalscript.NewPetalScriptLexer(is)
-	stream := antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
-	p := petalscript.NewPetalScript(stream)
-	l := listeners.NewPetalListener()
-
-	antlr.ParseTreeWalkerDefault.Walk(l, p.Program())
+	result := traverser.Walk(req.PetalScript)
 
 	return c.JSON(fiber.Map{
-		"transpiled": l.Result,
+		"transpiled": result,
 	})
 }

@@ -9,7 +9,9 @@ require (
 )
 
 require (
+	github.com/ClickHouse/clickhouse-go v1.5.4 // indirect
 	github.com/andybalholm/brotli v1.0.5 // indirect
+	github.com/cloudflare/golz4 v0.0.0-20150217214814-ef862a3cdc58 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/klauspost/compress v1.16.3 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect

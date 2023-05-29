@@ -7,4 +7,5 @@ import (
 
 func SetupRoutes(r fiber.Router) {
 	r.Post("/transpile", transpiler.TranspileToSQL)
+	r.Post("/execute", transpiler.RunAgainstClickHouse)
 }

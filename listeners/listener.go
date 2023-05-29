@@ -6,6 +6,7 @@ import (
 
 	"github.com/antlr4-go/antlr/v4"
 	"github.com/saqura-io/hanami/petalscript"
+	"github.com/saqura-io/hanami/util"
 )
 
 type petalListener struct {
@@ -62,7 +63,7 @@ type FilterCall struct {
 
 func (fc *FilterCall) String() string {
 	// Convert filter call into SQL
-	return fmt.Sprintf("SELECT * FROM logs WHERE application_id = %s AND %s = %s", fc.from.value, fc.by.value, fc.equals.value)
+	return fmt.Sprintf("SELECT * FROM logs WHERE application_id = %s AND %s = %s", fc.from.value, util.StripQuotes(fc.by.value), fc.equals.value)
 }
 
 type Aggregate struct {
@@ -133,7 +134,6 @@ func (l *petalListener) ExitAggregate(ctx *petalscript.AggregateContext) {
 	}
 
 	l.Result = aggregate.String()
-	fmt.Println(l.Result)
 }
 
 func (l *petalListener) EnterOutput_statement(ctx *petalscript.Output_statementContext) {
