@@ -8,7 +8,7 @@ import (
 func SetupRoutes(app *fiber.App) {
 	api := app.Group("/api")
 	v1Group := api.Group("/v1", func(c *fiber.Ctx) error {
-		c.Set("x-hanami-version", "v3")
+		c.Set("x-hanami-version", "v1")
 		return c.Next()
 	})
 
